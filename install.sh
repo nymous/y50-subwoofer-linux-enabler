@@ -12,7 +12,7 @@ username="$(/usr/bin/getent passwd 1000 | /usr/bin/cut -d: -f1)"
 
 echo ""
 echo "Clearing old /etc/sudoers.d/subwoofer file (if existing)..."
-sudo rm /etc/sudoers.d/subwoofer
+sudo rm /etc/sudoers.d/subwoofer 2>/dev/null
 
 echo ""
 echo "Allowing '/usr/bin/hda-verb' to be executed without sudo..."
@@ -21,24 +21,25 @@ echo 'guest ALL=NOPASSWD: /usr/bin/hda-verb' | sudo EDITOR='tee -a' visudo -f /e
 
 echo ""
 echo "Clearing old subwoofer script (if existing)..."
-sudo rm /opt/subwoofer.py
+sudo rm /opt/subwoofer/subwoofer3.py 2>/dev/null
 
 echo ""
-echo "Installing fresh subwoofer script to '/opt'..."
-sudo cp ./subwoofer.py /opt/subwoofer.py
-sudo chmod +x /opt/subwoofer.py
+echo "Installing fresh subwoofer script to '/opt/subwoofer'..."
+sudo mkdir -p /opt/subwoofer
+sudo cp ./subwoofer3.py /opt/subwoofer/subwoofer3.py
+sudo chmod +x /opt/subwoofer/subwoofer3.py
 
 echo ""
 echo "Clearing old subwoofer service (if existing)..."
-sudo rm /etc/systemd/system/subwoofer.service
-sudo rm /etc/systemd/user/subwoofer.service
+sudo rm /etc/systemd/system/subwoofer.service 2>/dev/null
+sudo rm /etc/systemd/user/subwoofer.service 2>/dev/null
 
 echo ""
 echo "Installing fresh subwoofer service to '/etc/systemd/system'..."
-systemctl --user stop subwoofer &> /dev/null
-systemctl --user disable subwoofer &> /dev/null
-sudo systemctl stop subwoofer &> /dev/null
-sudo systemctl disable subwoofer &> /dev/null
+systemctl --user stop subwoofer &>/dev/null
+systemctl --user disable subwoofer &>/dev/null
+sudo systemctl stop subwoofer &>/dev/null
+sudo systemctl disable subwoofer &>/dev/null
 if [ "$1" == "system" ]; then
 	sudo cp ./subwoofer.service /etc/systemd/system/subwoofer.service
 else
@@ -47,12 +48,14 @@ fi
 
 echo ""
 echo "Clearing old suspend script '/etc/pm/sleep.d/subwoofer.sh'..."
-sudo rm /etc/pm/sleep.d/subwoofer.sh
+sudo rm /etc/pm/sleep.d/subwoofer.sh 2>/dev/null
+sudo rm /lib/systemd/system-sleep/subwoofer 2>/dev/null
+
 
 echo ""
-echo "Copying fresh 'subwoofer.sh' to '/etc/pm/sleep.d/' to stop subwoofer on suspends..."
-sudo cp ./subwoofer.sh /etc/pm/sleep.d/subwoofer.sh
-sudo chmod +x /etc/pm/sleep.d/subwoofer.sh
+echo "Copying fresh suspend script..."
+sudo cp ./subwoofer_suspend.sh /lib/systemd/system-sleep/subwoofer
+sudo chmod +x /lib/systemd/system-sleep/subwoofer
 
 echo ""
 echo "Enabling (not starting!) service..."
